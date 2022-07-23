@@ -1,0 +1,5 @@
+.DS_Store
+.dccache
+virtualenv
+parameters.txt
+todo.txt
