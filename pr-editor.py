@@ -18,9 +18,9 @@ def main():
     owner = data['REPO_OWNER']
     repo = data['REPO_NAME']
     jiraInstance = data['JIRA_INSTANCE']
-    jiraToken = data['JIRA_TOKEN']   
+    jiraToken = data['JIRA_TOKEN']  
 
-    endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/pulls?state=open&per_page=100'
+    endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/pulls?state=all&per_page=100'
 
     headers = {
         'Authorization': 'token ' + scmToken
@@ -38,11 +38,11 @@ def main():
         if '[Snyk]' in response[count]['title']:
             if 'Jira' not in response[count]['body']:
                 pullNumber = response[count]['number']
-                # issueUrl = extractUrl(response[count]['body'])
                 urlList = extractUrls(response[count]['body'])
                 if urlList:
                     urlCount = len(urlList)
                     x = 1
+                    updatedPRBody = ''
                     while x <= urlCount:
                         urlList[x-1]
                         jiraIssueUrl = getJiraUrl(jiraInstance, jiraToken, repo, urlList[x-1])
