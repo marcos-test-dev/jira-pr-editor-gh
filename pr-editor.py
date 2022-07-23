@@ -2,9 +2,8 @@ import os
 import requests
 import json
 import re
-from tqdm import tqdm
-import progressbar
-
+import pyfiglet
+from rich import print as rprint
 
 def main():
     with open('parameters.txt') as f:
@@ -33,6 +32,10 @@ def main():
     
     count = 0
     x = 0
+
+    title = pyfiglet.figlet_format("JIRA PR Editor", font="slant")
+    rprint("[bold blue]" + title)
+    print('ATTACH YOUR JIRA TICKETS CREATED VIA SNYK TO ALREADY EXISTING PRS\n \n')
 
     while count < len(response):        
         if '[Snyk]' in response[count]['title']:
