@@ -197,8 +197,6 @@ def createLabel(owner, repo, token):
 def checkPRLabel(owner, repo, prNumber, token):
     endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/' + 'issues/' + str(prNumber) + '/labels'
 
-    print(endpoint)
-
     headers = {
         'Authorization': 'token ' + token
     }
