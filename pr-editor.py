@@ -37,6 +37,8 @@ def main():
     rprint("[bold blue]" + title)
     print('ATTACH YOUR JIRA TICKETS CREATED VIA SNYK TO ALREADY EXISTING PRS\n \n')
 
+    checkRepoLabels(owner, repo, scmToken)
+
     while count < len(response):        
         if '[Snyk]' in response[count]['title']:
             if 'Jira' not in response[count]['body']:
@@ -116,8 +118,8 @@ def getJiraUrl(instance, token, repo, url):
         jiraUrl = 'https://' + instance + '/browse/' + jiraIssueKey
         return jiraUrl
 
-def updatePR(owner, repo, pullNumber, updatedBody, token):
-    endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/pulls/' + str(pullNumber)
+def updatePR(owner, repo, prNumber, updatedBody, token):
+    endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/pulls/' + str(prNumber)
     
     headers = {
         'Authorization': 'token ' + token
@@ -133,7 +135,108 @@ def updatePR(owner, repo, pullNumber, updatedBody, token):
     except:
         print('Failed to update PR. Error code: ' + str(request.status_code))
     else:
-        print('PR #' + str(pullNumber) + ' was successfully updated!')
+        ret = checkPRLabel(owner, repo, prNumber, token)
+        if ret == 0:
+            print('PR #' + str(prNumber) + ' was successfully updated!')
+        else:
+            print('Failed to update PR. Please try again')
+
+def checkRepoLabels(owner, repo, token):
+    endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/labels'
+    
+    headers = {
+        'Authorization': 'token ' + token
+    }
+
+    body = ''
+
+    count = 0
+    hasLabel = 0
+
+    try:
+        request = requests.request('GET', endpoint, headers=headers, data=body)
+        response = request.json()
+    except:
+        print('Failed to get repo labels. Error code: ' + str(request.status_code))
+    else:
+        while count < len(response):
+            if 'JIRA' in response[count]['name']:
+                hasLabel = 1
+                break
+            count = count + 1
+        
+        if hasLabel == 0:
+            createLabel(owner, repo, token)
+
+def createLabel(owner, repo, token):
+    endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/labels'
+
+    headers = {
+        'Authorization': 'token ' + token
+    }
+
+    body = json.dumps({
+        "name": "JIRA",
+        "description": "A ticket has been created in JIRA for this PR",
+        "color": "0052CC",
+    })
+
+    try:
+        request = requests.request('POST', endpoint, headers=headers, data=body)
+        response = request.json()
+    except:
+        print('Failed to get repo labels. Error code: ' + str(request.status_code))
+    else:
+        print('Label successfully created!')
+        return 0
+
+def checkPRLabel(owner, repo, prNumber, token):
+    endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/' + 'issues/' + str(prNumber) + '/labels'
+
+    print(endpoint)
+
+    headers = {
+        'Authorization': 'token ' + token
+    }
+
+    body = ''
+    count = 0
+    hasLabel = 0
+
+    try:
+        request = requests.request('GET', endpoint, headers=headers, data=body)
+        response = request.json()
+    except:
+        print('Failed to get PR labels. Error code: ' + str(request.status_code))
+    else:
+        while count < len(response):
+            if 'JIRA' in response[count]['name']:
+                hasLabel = 1
+                return 0     
+        
+        if hasLabel == 0:
+            ret = addLabelToPR(owner, repo, prNumber, token)
+            if ret == 0:
+                return 0           
+
+def addLabelToPR(owner, repo, prNumber, token):
+    endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/' + 'issues/' + str(prNumber) + '/labels'
+
+    headers = {
+        'Authorization': 'token ' + token
+    }
+
+    body = json.dumps({
+        "labels":["JIRA"]
+    })
+
+    try:
+        request = requests.request('POST', endpoint, headers=headers, data=body)
+        response = request.json()
+    except:
+        print('Failed to add PR label. Error code: ' + str(request.status_code))
+    else:
+        return 0      
 
 if __name__ == '__main__':
   main()
