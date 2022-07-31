@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 import json
 import re
@@ -6,6 +7,9 @@ import pyfiglet
 from rich import print as rprint
 
 def main():
+    
+    checkSysVersion()
+
     with open('parameters.txt') as f:
         data = {}
         for line in f:
@@ -237,6 +241,12 @@ def addLabelToPR(owner, repo, prNumber, token):
         print('Failed to add PR label. Error code: ' + str(request.status_code))
     else:
         return 0      
+
+def checkSysVersion():
+    minVersion = (3, 9)
+    if not sys.version_info >= minVersion:
+        raise EnvironmentError(
+            "Python version too low, required at least {}".format('.'.join(str(n) for n in minVersion)))
 
 if __name__ == '__main__':
   main()
