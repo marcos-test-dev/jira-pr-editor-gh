@@ -1,11 +1,8 @@
 <h3 align="center">
-    JIRA PR Editor: Attach your JIRA tickets created via Snyk to already existing PRs.
+    :tickets: JIRA PR Editor: Attach your JIRA tickets created via Snyk to already existing PRs.
 </h3>
 
-  <img alt="Last commit" src="https://img.shields.io/github/last-commit/snyk-marcos/jira-pr-editor-gh">
-</p>
-
-## 🎟️ JIRA PR Editor
+##
 
 Please note this is not an official feature of Snyk. This was created as a hobby to be consumed and maintained by the community.
 
