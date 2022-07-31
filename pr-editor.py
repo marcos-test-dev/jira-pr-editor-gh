@@ -243,7 +243,7 @@ def addLabelToPR(owner, repo, prNumber, token):
         return 0      
 
 def checkSysVersion():
-    minVersion = (3, 9)
+    minVersion = (3, 0)
     if not sys.version_info >= minVersion:
         raise EnvironmentError(
             "Python version too low, required at least {}".format('.'.join(str(n) for n in minVersion)))
