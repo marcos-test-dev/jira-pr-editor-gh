@@ -52,17 +52,25 @@ def main():
                     urlCount = len(urlList)
                     x = 1
                     updatedPRBody = ''
+                    updatedPRTitle = ''
                     while x <= urlCount:
                         urlList[x-1]
-                        jiraIssueUrl = getJiraUrl(jiraInstance, jiraToken, repo, urlList[x-1])
+                        result = getJiraUrl(jiraInstance, jiraToken, repo, urlList[x-1])
+                        try:                      
+                            jiraIssueUrl, jiraIssueKey = result
+                        except:
+                            jiraIssueUrl = None
                         if jiraIssueUrl:
                             jiraButton = '<a href=' + jiraIssueUrl + ' alt="JIRA Ticket"> <img src="https://img.shields.io/badge/Jira-View%20Jira%20ticket-blue" /></a>'
                             prBody = response[count]['body']
+                            prTitle = response[count]['title']
                             if x == 1:
                                 updatedPRBody = jiraButton + '\n\n' + prBody
+                                updatedPRTitle = prTitle + ' - [' + jiraIssueKey + ']'
                             else:
                                 updatedPRBody = jiraButton + '\n' + updatedPRBody
-                            updatePR(owner, repo, pullNumber, updatedPRBody, scmToken)
+                                updatedPRTitle = updatedPRTitle + ' - [' + jiraIssueKey + ']'
+                            updatePR(owner, repo, pullNumber, updatedPRBody, updatedPRTitle, scmToken)
                             x = x + 1
                         else:
                             print('JIRA ticket not found for PR #' + str(pullNumber) + ' - [' + urlList[x-1] + ']')
@@ -120,9 +128,10 @@ def getJiraUrl(instance, token, repo, url):
     else:
         jiraIssueKey = jiraIssue['key']
         jiraUrl = 'https://' + instance + '/browse/' + jiraIssueKey
-        return jiraUrl
+        return jiraUrl, jiraIssueKey
 
-def updatePR(owner, repo, prNumber, updatedBody, token):
+
+def updatePR(owner, repo, prNumber, updatedBody, updatedTitle, token):
     endpoint = 'https://api.github.com/repos/' + owner + '/' + repo + '/pulls/' + str(prNumber)
     
     headers = {
@@ -130,6 +139,7 @@ def updatePR(owner, repo, prNumber, updatedBody, token):
     }
 
     body = json.dumps({
+        "title":updatedTitle,
         "body":updatedBody
     })
 
